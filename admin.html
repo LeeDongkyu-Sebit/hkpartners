@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 페이지 | HK금융파트너스 서초사업단</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ===== RESET ===== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --primary:      #0A3D91;
+            --primary-dark: #062970;
+            --primary-mid:  #1255B8;
+            --primary-light:#E8EFFC;
+            --accent:       #1C7ED6;
+            --gold:         #F5A623;
+            --kakao:        #FEE500;
+            --kakao-text:   #3C1E1E;
+            --success:      #10B981;
+            --warning:      #F59E0B;
+            --danger:       #EF4444;
+            --info:         #3B82F6;
+            --text-dark:    #1A1A2E;
+            --text-body:    #374151;
+            --text-muted:   #6B7280;
+            --bg-page:      #F1F5F9;
+            --bg-white:     #FFFFFF;
+            --border:       #E2E8F0;
+            --shadow-sm:    0 1px 3px rgba(0,0,0,.08);
+            --shadow-md:    0 4px 16px rgba(0,0,0,.1);
+            --radius:       10px;
+            --sidebar-w:    240px;
+        }
+
+        html, body { height: 100%; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; color: var(--text-body); background: var(--bg-page); }
+
+        /* ===== LAYOUT ===== */
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--primary-dark);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; bottom: 0; left: 0;
+            z-index: 200;
+            transition: transform .3s ease;
+        }
+
+        .sidebar-logo {
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid rgba(255,255,255,.1);
+        }
+
+        .sidebar-logo .badge {
+            font-size: .62rem;
+            color: rgba(255,255,255,.55);
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-logo h1 {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.3;
+        }
+
+        .sidebar-logo p {
+            font-size: .72rem;
+            color: rgba(255,255,255,.5);
+            margin-top: 2px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 0;
+        }
+
+        .nav-section-label {
+            font-size: .65rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,.35);
+            padding: 8px 20px 4px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            color: rgba(255,255,255,.7);
+            cursor: pointer;
+            border-radius: 0;
+            transition: all .2s;
+            border-left: 3px solid transparent;
+            font-size: .88rem;
+        }
+
+        .nav-item:hover { background: rgba(255,255,255,.07); color: #fff; }
+        .nav-item.active { background: rgba(255,255,255,.12); color: #fff; border-left-color: var(--gold); }
+        .nav-item i { width: 18px; text-align: center; font-size: .9rem; }
+
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255,255,255,.1);
+        }
+
+        .sidebar-footer a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,.6);
+            font-size: .82rem;
+            text-decoration: none;
+            transition: color .2s;
+        }
+        .sidebar-footer a:hover { color: #fff; }
+
+        /* ===== MAIN ===== */
+        .main-content {
+            margin-left: var(--sidebar-w);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ===== TOP BAR ===== */
+        .topbar {
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--text-body);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .page-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .topbar-time {
+            font-size: .78rem;
+            color: var(--text-muted);
+        }
+
+        .btn-refresh {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: none;
+            border-radius: 6px;
+            padding: 7px 14px;
+            font-size: .82rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all .2s;
+            font-family: inherit;
+        }
+        .btn-refresh:hover { background: var(--primary); color: #fff; }
+
+        /* ===== PAGE ===== */
+        .page {
+            padding: 24px;
+            display: none;
+        }
+        .page.active { display: block; }
+
+        /* ===== DASHBOARD STATS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-white);
+            border-radius: var(--radius);
+            padding: 20px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-card-icon {
+            width: 48px; height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .stat-card-icon.blue   { background: #EFF6FF; color: var(--info); }
+        .stat-card-icon.green  { background: #ECFDF5; color: var(--success); }
+        .stat-card-icon.yellow { background: #FFFBEB; color: var(--warning); }
+        .stat-card-icon.red    { background: #FEF2F2; color: var(--danger); }
+
+        .stat-card-body {}
+        .stat-card-num {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            line-height: 1;
+        }
+        .stat-card-label {
+            font-size: .78rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        /* ===== CHART GRID ===== */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .chart-card {
+            background: var(--bg-white);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chart-card h3 {
+            font-size: .9rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chart-card h3 i { color: var(--primary); }
+
+        .chart-wrap { position: relative; height: 220px; }
+
+        /* ===== PANEL ===== */
+        .panel {
+            background: var(--bg-white);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .panel-title {
+            font-size: .95rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel-title i { color: var(--primary); }
+
+        .panel-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* ===== FILTER BAR ===== */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            background: #FAFBFE;
+            flex-wrap: wrap;
+        }
+
+        .filter-input, .filter-select {
+            padding: 7px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 7px;
+            font-size: .82rem;
+            font-family: inherit;
+            color: var(--text-dark);
+            background: #fff;
+            outline: none;
+            transition: border-color .2s;
+        }
+        .filter-input:focus, .filter-select:focus { border-color: var(--primary); }
+        .filter-input { min-width: 180px; }
+        .filter-select { cursor: pointer; }
+
+        .filter-label {
+            font-size: .78rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* ===== TABLE ===== */
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            padding: 10px 14px;
+            text-align: left;
+            font-size: .76rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            background: #FAFBFE;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+        }
+        thead th:hover { color: var(--primary); }
+        thead th .sort-icon { margin-left: 4px; opacity: .5; }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background .15s;
+        }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: #F8FAFF; }
+
+        tbody td {
+            padding: 12px 14px;
+            font-size: .855rem;
+            color: var(--text-body);
+            vertical-align: middle;
+        }
+
+        .td-name { font-weight: 600; color: var(--text-dark); }
+        .td-phone { font-family: 'Courier New', monospace; letter-spacing: .04em; }
+        .td-date { font-size: .78rem; color: var(--text-muted); }
+
+        /* ===== BADGE ===== */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 100px;
+            font-size: .72rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .badge-접수    { background: #EFF6FF; color: #1D4ED8; }
+        .badge-검토중  { background: #FFFBEB; color: #B45309; }
+        .badge-연락완료 { background: #ECFDF5; color: #065F46; }
+        .badge-면담완료 { background: #EDE9FE; color: #5B21B6; }
+        .badge-불합격  { background: #FEF2F2; color: #991B1B; }
+        .badge-신입    { background: #F0FDF4; color: #166534; }
+        .badge-경력    { background: #EFF6FF; color: #1E40AF; }
+
+        /* ===== STATUS SELECT ===== */
+        .status-select {
+            padding: 4px 8px;
+            border: 1.5px solid var(--border);
+            border-radius: 6px;
+            font-size: .78rem;
+            font-family: inherit;
+            cursor: pointer;
+            color: var(--text-dark);
+            background: #fff;
+            outline: none;
+        }
+        .status-select:focus { border-color: var(--primary); }
+
+        /* ===== ACTION BTNS ===== */
+        .action-btns {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .btn-icon {
+            width: 30px; height: 30px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .8rem;
+            transition: all .2s;
+        }
+        .btn-icon-view  { background: #EFF6FF; color: var(--info); }
+        .btn-icon-kakao { background: rgba(254,229,0,.3); color: #8B6A00; }
+        .btn-icon-del   { background: #FEF2F2; color: var(--danger); }
+        .btn-icon:hover { opacity: .8; transform: scale(1.1); }
+
+        /* ===== PAGINATION ===== */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-top: 1px solid var(--border);
+            background: #FAFBFE;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .pagination-info {
+            font-size: .78rem;
+            color: var(--text-muted);
+        }
+
+        .pagination-btns {
+            display: flex;
+            gap: 4px;
+        }
+
+        .page-btn {
+            padding: 5px 10px;
+            border: 1.5px solid var(--border);
+            border-radius: 6px;
+            background: #fff;
+            font-size: .78rem;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .2s;
+            color: var(--text-body);
+        }
+        .page-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .page-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+        /* ===== DETAIL MODAL ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.5);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.open { display: flex; }
+
+        .modal-box {
+            background: #fff;
+            border-radius: 14px;
+            max-width: 480px;
+            width: calc(100% - 40px);
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,.3);
+        }
+
+        .modal-header {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .modal-close {
+            background: var(--bg-page);
+            border: none;
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            font-size: .85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: all .2s;
+        }
+        .modal-close:hover { background: var(--border); color: var(--text-dark); }
+
+        .modal-body {
+            padding: 20px 24px;
+        }
+
+        .detail-row {
+            display: flex;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            align-items: flex-start;
+        }
+        .detail-row:last-child { border-bottom: none; }
+
+        .detail-label {
+            font-size: .75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            min-width: 80px;
+            padding-top: 1px;
+        }
+
+        .detail-value {
+            font-size: .88rem;
+            color: var(--text-dark);
+            flex: 1;
+        }
+
+        .memo-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 7px;
+            font-size: .85rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+            color: var(--text-dark);
+            outline: none;
+            transition: border-color .2s;
+        }
+        .memo-textarea:focus { border-color: var(--primary); }
+
+        .modal-footer {
+            padding: 14px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .btn-save {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            padding: 9px 20px;
+            font-size: .85rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .2s;
+        }
+        .btn-save:hover { background: var(--primary-dark); }
+
+        .btn-cancel-modal {
+            background: var(--bg-page);
+            color: var(--text-muted);
+            border: 1.5px solid var(--border);
+            border-radius: 7px;
+            padding: 9px 16px;
+            font-size: .85rem;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .2s;
+        }
+        .btn-cancel-modal:hover { background: var(--border); }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+        .empty-state i { font-size: 2.5rem; opacity: .3; margin-bottom: 12px; display: block; }
+        .empty-state p { font-size: .9rem; }
+
+        /* ===== LOADING ===== */
+        .loading-state {
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+        .loading-state i { animation: spin 1s linear infinite; font-size: 1.5rem; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* ===== TOAST ===== */
+        .toast-wrap {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .toast {
+            background: var(--text-dark);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 100px;
+            font-size: .82rem;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity .3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toast.show { opacity: 1; }
+        .toast.toast-success { background: var(--success); }
+        .toast.toast-error   { background: var(--danger); }
+
+        /* ===== EXPORT BTN ===== */
+        .btn-export {
+            background: #ECFDF5;
+            color: #065F46;
+            border: 1.5px solid #D1FAE5;
+            border-radius: 7px;
+            padding: 7px 14px;
+            font-size: .8rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all .2s;
+        }
+        .btn-export:hover { background: #D1FAE5; }
+
+        /* ===== LOGIN ===== */
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-mid));
+        }
+
+        .login-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 40px 36px;
+            width: 360px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.3);
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .login-logo span {
+            display: inline-block;
+            background: var(--primary-dark);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 800;
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        .login-logo p {
+            margin-top: 10px;
+            font-size: .85rem;
+            color: var(--text-muted);
+        }
+
+        .login-form-group {
+            margin-bottom: 16px;
+        }
+
+        .login-form-group label {
+            display: block;
+            font-size: .8rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+
+        .login-form-group input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: .9rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color .2s;
+        }
+        .login-form-group input:focus { border-color: var(--primary); }
+
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary-mid), var(--primary-dark));
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            padding: 13px;
+            font-size: .95rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            margin-top: 8px;
+            transition: opacity .2s;
+        }
+        .login-btn:hover { opacity: .9; }
+
+        .login-error {
+            color: var(--danger);
+            font-size: .8rem;
+            text-align: center;
+            margin-top: 10px;
+            min-height: 18px;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .chart-grid  { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 720px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .menu-toggle { display: block; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .page { padding: 16px; }
+            .topbar { padding: 0 16px; }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .filter-bar { gap: 8px; }
+            .filter-input { min-width: 130px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div class="login-page" id="loginPage">
+    <div class="login-box">
+        <div class="login-logo">
+            <span>HK금융파트너스</span>
+            <p>서초사업단 온라인운영팀 관리자</p>
+        </div>
+        <div class="login-form-group">
+            <label>아이디</label>
+            <input type="text" id="loginId" placeholder="관리자 아이디" autocomplete="username">
+        </div>
+        <div class="login-form-group">
+            <label>비밀번호</label>
+            <input type="password" id="loginPw" placeholder="비밀번호" autocomplete="current-password"
+                   onkeydown="if(event.key==='Enter') doLogin()">
+        </div>
+        <button class="login-btn" onclick="doLogin()">
+            <i class="fas fa-sign-in-alt"></i>&nbsp;로그인
+        </button>
+        <p class="login-error" id="loginError"></p>
+        <p style="text-align:center;font-size:.72rem;color:#bbb;margin-top:16px;">초기 계정: admin / hk2025</p>
+    </div>
+</div>
+
+<!-- ===== ADMIN LAYOUT ===== -->
+<div class="admin-layout" id="adminLayout" style="display:none;">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <span class="badge">HK금융파트너스</span>
+            <h1>서초사업단<br>관리자</h1>
+            <p>온라인운영팀</p>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section-label">대시보드</div>
+            <div class="nav-item active" onclick="showPage('dashboard', this)">
+                <i class="fas fa-chart-pie"></i> 현황 대시보드
+            </div>
+            <div class="nav-section-label">신청 관리</div>
+            <div class="nav-item" onclick="showPage('applications', this)">
+                <i class="fas fa-file-lines"></i> 전체 신청 목록
+            </div>
+            <div class="nav-item" onclick="showPage('by-region', this)">
+                <i class="fas fa-map-location-dot"></i> 지역별 보기
+            </div>
+            <div class="nav-item" onclick="showPage('by-career', this)">
+                <i class="fas fa-briefcase"></i> 경력별 보기
+            </div>
+            <div class="nav-item" onclick="showPage('by-status', this)">
+                <i class="fas fa-tags"></i> 진행상태별
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="index.html" target="_blank">
+                <i class="fas fa-arrow-up-right-from-square"></i> 랜딩페이지 보기
+            </a>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main-content">
+        <!-- TOPBAR -->
+        <div class="topbar">
+            <div class="topbar-left">
+                <button class="menu-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="page-title" id="pageTitle">현황 대시보드</div>
+            </div>
+            <div class="topbar-right">
+                <span class="topbar-time" id="topbarTime"></span>
+                <button class="btn-refresh" onclick="refreshCurrentPage()">
+                    <i class="fas fa-rotate-right"></i> 새로고침
+                </button>
+                <button class="btn-refresh" onclick="doLogout()" style="background:#FEF2F2;color:#991B1B;">
+                    <i class="fas fa-sign-out-alt"></i> 로그아웃
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== DASHBOARD PAGE ===== -->
+        <div class="page active" id="page-dashboard">
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-card-icon blue"><i class="fas fa-inbox"></i></div>
+                    <div class="stat-card-body">
+                        <div class="stat-card-num" id="statTotal">-</div>
+                        <div class="stat-card-label">총 신청 수</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon yellow"><i class="fas fa-hourglass-half"></i></div>
+                    <div class="stat-card-body">
+                        <div class="stat-card-num" id="statPending">-</div>
+                        <div class="stat-card-label">검토 중 (미처리)</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon green"><i class="fas fa-phone-volume"></i></div>
+                    <div class="stat-card-body">
+                        <div class="stat-card-num" id="statContacted">-</div>
+                        <div class="stat-card-label">연락 완료</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon red"><i class="fas fa-calendar-check"></i></div>
+                    <div class="stat-card-body">
+                        <div class="stat-card-num" id="statInterview">-</div>
+                        <div class="stat-card-label">면담 완료</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <h3><i class="fas fa-map-location-dot"></i> 지역별 신청 현황</h3>
+                    <div class="chart-wrap"><canvas id="regionChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <h3><i class="fas fa-briefcase"></i> 경력/신입 비율</h3>
+                    <div class="chart-wrap"><canvas id="careerChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <h3><i class="fas fa-tags"></i> 진행 상태 현황</h3>
+                    <div class="chart-wrap"><canvas id="statusChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <h3><i class="fas fa-calendar-day"></i> 최근 7일 신청 추이</h3>
+                    <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- 최근 신청 -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title"><i class="fas fa-clock-rotate-left"></i> 최근 신청 10건</div>
+                    <div onclick="showPage('applications', document.querySelector('.nav-item:nth-child(4)'));"
+                         style="cursor:pointer;font-size:.8rem;color:var(--primary);font-weight:600;">전체 보기 →</div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>이름</th>
+                                <th>나이</th>
+                                <th>성별</th>
+                                <th>전화번호</th>
+                                <th>지역</th>
+                                <th>경력</th>
+                                <th>상태</th>
+                                <th>신청일</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentTableBody">
+                            <tr><td colspan="8" class="loading-state"><i class="fas fa-spinner"></i></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== APPLICATIONS PAGE ===== -->
+        <div class="page" id="page-applications">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title"><i class="fas fa-file-lines"></i> 전체 신청 목록</div>
+                    <div class="panel-controls">
+                        <button class="btn-export" onclick="exportCSV()">
+                            <i class="fas fa-download"></i> CSV 내보내기
+                        </button>
+                    </div>
+                </div>
+                <div class="filter-bar">
+                    <span class="filter-label">검색:</span>
+                    <input type="text" class="filter-input" id="searchInput" placeholder="이름 또는 전화번호 검색..."
+                           oninput="applyFilters()">
+                    <span class="filter-label">지역:</span>
+                    <select class="filter-select" id="filterRegion" onchange="applyFilters()">
+                        <option value="">전체</option>
+                    </select>
+                    <span class="filter-label">경력:</span>
+                    <select class="filter-select" id="filterCareer" onchange="applyFilters()">
+                        <option value="">전체</option>
+                        <option value="신입">신입</option>
+                        <option value="경력 1년 미만">경력 1년 미만</option>
+                        <option value="경력 1~3년">경력 1~3년</option>
+                        <option value="경력 3~5년">경력 3~5년</option>
+                        <option value="경력 5년 이상">경력 5년 이상</option>
+                    </select>
+                    <span class="filter-label">상태:</span>
+                    <select class="filter-select" id="filterStatus" onchange="applyFilters()">
+                        <option value="">전체</option>
+                        <option value="접수">접수</option>
+                        <option value="검토중">검토중</option>
+                        <option value="연락완료">연락완료</option>
+                        <option value="면담완료">면담완료</option>
+                        <option value="불합격">불합격</option>
+                    </select>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable('name')">이름 <span class="sort-icon">↕</span></th>
+                                <th onclick="sortTable('age')">나이 <span class="sort-icon">↕</span></th>
+                                <th onclick="sortTable('gender')">성별 <span class="sort-icon">↕</span></th>
+                                <th>전화번호</th>
+                                <th onclick="sortTable('region')">지역 <span class="sort-icon">↕</span></th>
+                                <th onclick="sortTable('career')">경력 <span class="sort-icon">↕</span></th>
+                                <th onclick="sortTable('status')">상태 <span class="sort-icon">↕</span></th>
+                                <th onclick="sortTable('created_at')">신청일 <span class="sort-icon">↕</span></th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appTableBody">
+                            <tr><td colspan="9" class="loading-state"><i class="fas fa-spinner"></i></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="pagination"></div>
+            </div>
+        </div>
+
+        <!-- ===== BY-REGION PAGE ===== -->
+        <div class="page" id="page-by-region">
+            <div id="regionGroupWrap"></div>
+        </div>
+
+        <!-- ===== BY-CAREER PAGE ===== -->
+        <div class="page" id="page-by-career">
+            <div id="careerGroupWrap"></div>
+        </div>
+
+        <!-- ===== BY-STATUS PAGE ===== -->
+        <div class="page" id="page-by-status">
+            <div id="statusGroupWrap"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== DETAIL MODAL ===== -->
+<div class="modal-overlay" id="detailModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 id="modalTitle">신청자 상세 정보</h3>
+            <button class="modal-close" onclick="closeModal()"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-footer">
+            <button class="btn-cancel-modal" onclick="closeModal()">닫기</button>
+            <button class="btn-save" onclick="saveMemo()"><i class="fas fa-floppy-disk"></i>&nbsp;저장</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONSTANTS
+// ─────────────────────────────────────────────
+const TABLE   = 'hk_recruit_applications';
+const KAKAO   = 'https://open.kakao.com/o/sZeVtimi';
+const ADMIN_ID = 'admin';
+const ADMIN_PW = 'hk2025';
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let allData    = [];
+let filtered   = [];
+let sortField  = 'created_at';
+let sortDir    = 'desc';
+let curPage    = 1;
+const PAGE_SIZE = 15;
+let currentRecord = null;
+let charts = {};
+
+// ─────────────────────────────────────────────
+// LOGIN
+// ─────────────────────────────────────────────
+function doLogin() {
+    const id = document.getElementById('loginId').value.trim();
+    const pw = document.getElementById('loginPw').value;
+    if (id === ADMIN_ID && pw === ADMIN_PW) {
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('adminLayout').style.display = 'flex';
+        startClock();
+        loadAllData();
+    } else {
+        document.getElementById('loginError').textContent = '아이디 또는 비밀번호가 올바르지 않습니다.';
+        setTimeout(() => { document.getElementById('loginError').textContent = ''; }, 2500);
+    }
+}
+
+function doLogout() {
+    document.getElementById('adminLayout').style.display = 'none';
+    document.getElementById('loginPage').style.display = 'flex';
+    document.getElementById('loginId').value = '';
+    document.getElementById('loginPw').value = '';
+}
+
+// ─────────────────────────────────────────────
+// CLOCK
+// ─────────────────────────────────────────────
+function startClock() {
+    function tick() {
+        const now = new Date();
+        document.getElementById('topbarTime').textContent =
+            now.toLocaleString('ko-KR', { year:'numeric', month:'2-digit', day:'2-digit',
+                                           hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    }
+    tick();
+    setInterval(tick, 1000);
+}
+
+// ─────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────
+function showPage(pageId, navEl) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + pageId).classList.add('active');
+    if (navEl) navEl.classList.add('active');
+    const titles = {
+        'dashboard':   '현황 대시보드',
+        'applications':'전체 신청 목록',
+        'by-region':   '지역별 보기',
+        'by-career':   '경력별 보기',
+        'by-status':   '진행상태별 보기',
+    };
+    document.getElementById('pageTitle').textContent = titles[pageId] || '';
+    renderPage(pageId);
+    // 모바일 사이드바 닫기
+    document.getElementById('sidebar').classList.remove('open');
+}
+
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+}
+
+function refreshCurrentPage() {
+    loadAllData();
+}
+
+// ─────────────────────────────────────────────
+// DATA LOAD
+// ─────────────────────────────────────────────
+async function loadAllData() {
+    try {
+        let page = 1, all = [];
+        while (true) {
+            const res = await fetch(`tables/${TABLE}?page=${page}&limit=100`);
+            const json = await res.json();
+            all = all.concat(json.data || []);
+            if (all.length >= json.total || !json.data?.length) break;
+            page++;
+        }
+        allData = all.sort((a,b) => (b.created_at||0) - (a.created_at||0));
+        filtered = [...allData];
+        renderCurrentActive();
+        populateRegionFilter();
+    } catch (err) {
+        console.error(err);
+        showToast('데이터 로드 실패', 'error');
+    }
+}
+
+function renderCurrentActive() {
+    const active = document.querySelector('.page.active');
+    if (!active) return;
+    const id = active.id.replace('page-', '');
+    renderPage(id);
+}
+
+function renderPage(id) {
+    if (id === 'dashboard')    renderDashboard();
+    if (id === 'applications') renderApplications();
+    if (id === 'by-region')    renderGroupPage('region', 'regionGroupWrap');
+    if (id === 'by-career')    renderGroupPage('career', 'careerGroupWrap');
+    if (id === 'by-status')    renderGroupPage('status', 'statusGroupWrap');
+}
+
+// ─────────────────────────────────────────────
+// DASHBOARD
+// ─────────────────────────────────────────────
+function renderDashboard() {
+    const total      = allData.length;
+    const pending    = allData.filter(r => r.status === '접수' || r.status === '검토중').length;
+    const contacted  = allData.filter(r => r.status === '연락완료').length;
+    const interview  = allData.filter(r => r.status === '면담완료').length;
+
+    document.getElementById('statTotal').textContent     = total;
+    document.getElementById('statPending').textContent   = pending;
+    document.getElementById('statContacted').textContent = contacted;
+    document.getElementById('statInterview').textContent = interview;
+
+    // Recent 10
+    const tbody = document.getElementById('recentTableBody');
+    const recent = allData.slice(0, 10);
+    if (!recent.length) {
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="fas fa-inbox"></i><p>신청 데이터가 없습니다</p></td></tr>';
+    } else {
+        tbody.innerHTML = recent.map(r => `
+            <tr>
+                <td class="td-name">${esc(r.name)}</td>
+                <td style="text-align:center">${r.age ? r.age+'세' : '-'}</td>
+                <td style="text-align:center">${r.gender ? `<span class="badge" style="background:${r.gender==='남성'?'#EFF6FF':'#FDF2F8'};color:${r.gender==='남성'?'#1E40AF':'#9D174D'}">${esc(r.gender)}</span>` : '-'}</td>
+                <td class="td-phone">${esc(r.phone)}</td>
+                <td>${r.region ? `<span class="badge badge-신입">${esc(r.region)}</span>` : '-'}</td>
+                <td>${r.career ? `<span class="badge ${careerBadge(r.career)}">${esc(r.career)}</span>` : '-'}</td>
+                <td>${statusBadgeHtml(r.status)}</td>
+                <td class="td-date">${fmtDate(r.created_at)}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Charts
+    drawCharts();
+}
+
+function drawCharts() {
+    // Destroy existing
+    Object.values(charts).forEach(c => c && c.destroy());
+    charts = {};
+
+    // 지역별
+    const regionCount = groupCount(allData, 'region');
+    charts.region = new Chart(document.getElementById('regionChart'), {
+        type: 'bar',
+        data: {
+            labels: Object.keys(regionCount),
+            datasets: [{
+                data: Object.values(regionCount),
+                backgroundColor: '#1C7ED6',
+                borderRadius: 6,
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false,
+                   plugins: { legend: { display: false } },
+                   scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+
+    // 경력별
+    const careerCount = groupCount(allData, 'career');
+    const careerColors = ['#0A3D91','#1255B8','#1C7ED6','#74C0FC','#BFD7FF'];
+    charts.career = new Chart(document.getElementById('careerChart'), {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(careerCount),
+            datasets: [{ data: Object.values(careerCount), backgroundColor: careerColors, borderWidth: 2 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false,
+                   plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+    });
+
+    // 상태별
+    const statusCount = groupCount(allData, 'status');
+    const statusColors = { '접수':'#3B82F6','검토중':'#F59E0B','연락완료':'#10B981','면담완료':'#8B5CF6','불합격':'#EF4444' };
+    charts.status = new Chart(document.getElementById('statusChart'), {
+        type: 'pie',
+        data: {
+            labels: Object.keys(statusCount),
+            datasets: [{ data: Object.values(statusCount),
+                         backgroundColor: Object.keys(statusCount).map(k => statusColors[k]||'#ccc'),
+                         borderWidth: 2 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false,
+                   plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+    });
+
+    // 7일 추이
+    const trend = buildTrend(allData, 7);
+    charts.trend = new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: {
+            labels: trend.labels,
+            datasets: [{
+                label: '신청 수',
+                data: trend.values,
+                borderColor: '#0A3D91',
+                backgroundColor: 'rgba(10,61,145,.08)',
+                fill: true,
+                tension: .4,
+                pointRadius: 4,
+                pointBackgroundColor: '#0A3D91',
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false,
+                   plugins: { legend: { display: false } },
+                   scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+}
+
+// ─────────────────────────────────────────────
+// APPLICATIONS TABLE
+// ─────────────────────────────────────────────
+function applyFilters() {
+    const search = document.getElementById('searchInput')?.value.toLowerCase() || '';
+    const region = document.getElementById('filterRegion')?.value || '';
+    const career = document.getElementById('filterCareer')?.value || '';
+    const status = document.getElementById('filterStatus')?.value || '';
+
+    filtered = allData.filter(r => {
+        const matchSearch = !search ||
+            (r.name  && r.name.toLowerCase().includes(search)) ||
+            (r.phone && r.phone.includes(search));
+        const matchRegion = !region || r.region === region;
+        const matchCareer = !career || r.career === career;
+        const matchStatus = !status || r.status === status;
+        return matchSearch && matchRegion && matchCareer && matchStatus;
+    });
+
+    curPage = 1;
+    renderTable();
+}
+
+function sortTable(field) {
+    if (sortField === field) {
+        sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+        sortField = field;
+        sortDir   = 'asc';
+    }
+    filtered.sort((a,b) => {
+        const av = a[field] || '';
+        const bv = b[field] || '';
+        return sortDir === 'asc' ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
+    });
+    renderTable();
+}
+
+function renderApplications() {
+    applyFilters();
+}
+
+function renderTable() {
+    const tbody = document.getElementById('appTableBody');
+    if (!tbody) return;
+
+    const start = (curPage - 1) * PAGE_SIZE;
+    const pageData = filtered.slice(start, start + PAGE_SIZE);
+
+    if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-search"></i><p>검색 결과가 없습니다</p></div></td></tr>';
+        document.getElementById('pagination').innerHTML = '';
+        return;
+    }
+
+    tbody.innerHTML = pageData.map(r => `
+        <tr>
+            <td class="td-name">${esc(r.name)}</td>
+            <td style="text-align:center">${r.age ? r.age+'세' : '-'}</td>
+            <td style="text-align:center">${r.gender ? `<span class="badge" style="background:${r.gender==='남성'?'#EFF6FF':'#FDF2F8'};color:${r.gender==='남성'?'#1E40AF':'#9D174D'}">${esc(r.gender)}</span>` : '-'}</td>
+            <td class="td-phone">${esc(r.phone)}</td>
+            <td>${r.region ? `<span class="badge badge-신입">${esc(r.region)}</span>` : '-'}</td>
+            <td>${r.career ? `<span class="badge ${careerBadge(r.career)}">${esc(r.career)}</span>` : '-'}</td>
+            <td>
+                <select class="status-select" onchange="updateStatus('${r.id}', this.value)" title="상태 변경">
+                    ${['접수','검토중','연락완료','면담완료','불합격'].map(s =>
+                        `<option value="${s}" ${r.status===s?'selected':''}>${s}</option>`
+                    ).join('')}
+                </select>
+            </td>
+            <td class="td-date">${fmtDate(r.created_at)}</td>
+            <td>
+                <div class="action-btns">
+                    <button class="btn-icon btn-icon-view"   onclick="openDetail('${r.id}')" title="상세 보기"><i class="fas fa-eye"></i></button>
+                    <a      class="btn-icon btn-icon-kakao"  href="${KAKAO}" target="_blank"  title="카카오톡 문의"><i class="fab fa-comment"></i></a>
+                    <button class="btn-icon btn-icon-del"    onclick="deleteRecord('${r.id}')" title="삭제"><i class="fas fa-trash"></i></button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+
+    renderPagination();
+}
+
+function renderPagination() {
+    const total = filtered.length;
+    const pages = Math.ceil(total / PAGE_SIZE);
+    const el = document.getElementById('pagination');
+    if (!el) return;
+
+    let btns = '';
+    btns += `<button class="page-btn" onclick="goPage(${curPage-1})" ${curPage<=1?'disabled':''}>‹ 이전</button>`;
+    const start = Math.max(1, curPage - 2);
+    const end   = Math.min(pages, curPage + 2);
+    for (let p = start; p <= end; p++) {
+        btns += `<button class="page-btn ${p===curPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+    }
+    btns += `<button class="page-btn" onclick="goPage(${curPage+1})" ${curPage>=pages?'disabled':''}>다음 ›</button>`;
+
+    el.innerHTML = `
+        <span class="pagination-info">총 ${total}건 중 ${Math.min((curPage-1)*PAGE_SIZE+1, total)}~${Math.min(curPage*PAGE_SIZE, total)}건</span>
+        <div class="pagination-btns">${btns}</div>
+    `;
+}
+
+function goPage(p) {
+    curPage = p;
+    renderTable();
+}
+
+// ─────────────────────────────────────────────
+// GROUP PAGES (지역/경력/상태별)
+// ─────────────────────────────────────────────
+function renderGroupPage(field, wrapId) {
+    const wrap = document.getElementById(wrapId);
+    if (!wrap) return;
+
+    const groups = {};
+    allData.forEach(r => {
+        const key = r[field] || '미입력';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(r);
+    });
+
+    if (!Object.keys(groups).length) {
+        wrap.innerHTML = '<div class="panel"><div class="empty-state"><i class="fas fa-inbox"></i><p>데이터가 없습니다</p></div></div>';
+        return;
+    }
+
+    const fieldLabels = { region: '지역', career: '경력/신입', status: '진행 상태' };
+    const label = fieldLabels[field] || field;
+
+    wrap.innerHTML = Object.entries(groups)
+        .sort((a,b) => b[1].length - a[1].length)
+        .map(([key, rows]) => `
+        <div class="panel" style="margin-bottom:20px;">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <i class="fas fa-folder"></i>
+                    ${label}: <strong>${esc(key)}</strong>
+                    <span style="font-size:.78rem;font-weight:400;color:var(--text-muted);margin-left:6px;">(${rows.length}건)</span>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr>
+                        <th>이름</th><th>나이</th><th>성별</th><th>전화번호</th>
+                        ${field !== 'region' ? '<th>지역</th>' : ''}
+                        ${field !== 'career' ? '<th>경력</th>' : ''}
+                        ${field !== 'status' ? '<th>상태</th>' : ''}
+                        <th>신청일</th><th>관리</th>
+                    </tr></thead>
+                    <tbody>
+                        ${rows.map(r => `
+                            <tr>
+                                <td class="td-name">${esc(r.name)}</td>
+                                <td style="text-align:center">${r.age ? r.age+'세' : '-'}</td>
+                                <td style="text-align:center">${r.gender ? `<span class="badge" style="background:${r.gender==='남성'?'#EFF6FF':'#FDF2F8'};color:${r.gender==='남성'?'#1E40AF':'#9D174D'}">${esc(r.gender)}</span>` : '-'}</td>
+                                <td class="td-phone">${esc(r.phone)}</td>
+                                ${field !== 'region' ? `<td><span class="badge badge-신입">${esc(r.region||'-')}</span></td>` : ''}
+                                ${field !== 'career' ? `<td><span class="badge ${careerBadge(r.career)}">${esc(r.career||'-')}</span></td>` : ''}
+                                ${field !== 'status' ? `<td>${statusBadgeHtml(r.status)}</td>` : ''}
+                                <td class="td-date">${fmtDate(r.created_at)}</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-icon btn-icon-view" onclick="openDetail('${r.id}')" title="상세"><i class="fas fa-eye"></i></button>
+                                        <a class="btn-icon btn-icon-kakao" href="${KAKAO}" target="_blank" title="카카오톡"><i class="fab fa-comment"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ─────────────────────────────────────────────
+// DETAIL MODAL
+// ─────────────────────────────────────────────
+function openDetail(id) {
+    const r = allData.find(x => x.id === id);
+    if (!r) return;
+    currentRecord = r;
+
+    document.getElementById('modalTitle').textContent = `${r.name}님 상세 정보`;
+    document.getElementById('modalBody').innerHTML = `
+        <div class="detail-row"><span class="detail-label">이름</span><span class="detail-value"><strong>${esc(r.name)}</strong></span></div>
+        <div class="detail-row"><span class="detail-label">나이</span><span class="detail-value">${r.age ? r.age + '세' : '-'}</span></div>
+        <div class="detail-row"><span class="detail-label">성별</span><span class="detail-value">${r.gender ? `<span class="badge" style="background:${r.gender==='남성'?'#EFF6FF':'#FDF2F8'};color:${r.gender==='남성'?'#1E40AF':'#9D174D'}">${esc(r.gender)}</span>` : '-'}</span></div>
+        <div class="detail-row"><span class="detail-label">전화번호</span><span class="detail-value td-phone">${esc(r.phone)}</span></div>
+        <div class="detail-row"><span class="detail-label">지역</span><span class="detail-value">${r.region ? `<span class="badge badge-신입">${esc(r.region)}</span>` : '-'}</span></div>
+        <div class="detail-row"><span class="detail-label">경력/신입</span><span class="detail-value"><span class="badge ${careerBadge(r.career)}">${esc(r.career||'-')}</span></span></div>
+        <div class="detail-row"><span class="detail-label">진행 상태</span>
+            <span class="detail-value">
+                <select class="status-select" id="modalStatus">
+                    ${['접수','검토중','연락완료','면담완료','불합격'].map(s=>
+                        `<option value="${s}" ${r.status===s?'selected':''}>${s}</option>`
+                    ).join('')}
+                </select>
+            </span>
+        </div>
+        <div class="detail-row"><span class="detail-label">신청일시</span><span class="detail-value td-date">${fmtDate(r.created_at)}</span></div>
+        <div class="detail-row" style="flex-direction:column;gap:8px;">
+            <span class="detail-label">메모</span>
+            <textarea class="memo-textarea" id="modalMemo" placeholder="관리자 메모를 입력하세요...">${esc(r.memo || '')}</textarea>
+        </div>
+        <div style="margin-top:12px;">
+            <a href="${KAKAO}" target="_blank" class="btn-save" style="display:inline-flex;align-items:center;gap:6px;background:var(--kakao);color:var(--kakao-text);text-decoration:none;padding:9px 16px;border-radius:7px;font-size:.85rem;font-weight:700;">
+                <i class="fab fa-comment"></i> 카카오톡으로 연락하기
+            </a>
+        </div>
+    `;
+
+    document.getElementById('detailModal').classList.add('open');
+}
+
+function closeModal() {
+    document.getElementById('detailModal').classList.remove('open');
+    currentRecord = null;
+}
+
+async function saveMemo() {
+    if (!currentRecord) return;
+    const status = document.getElementById('modalStatus')?.value;
+    const memo   = document.getElementById('modalMemo')?.value || '';
+
+    try {
+        const res = await fetch(`tables/${TABLE}/${currentRecord.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status, memo }),
+        });
+        if (!res.ok) throw new Error();
+        // 로컬 업데이트
+        const idx = allData.findIndex(r => r.id === currentRecord.id);
+        if (idx !== -1) { allData[idx].status = status; allData[idx].memo = memo; }
+        showToast('저장되었습니다', 'success');
+        closeModal();
+        renderCurrentActive();
+    } catch {
+        showToast('저장 실패', 'error');
+    }
+}
+
+// ─────────────────────────────────────────────
+// STATUS UPDATE (inline)
+// ─────────────────────────────────────────────
+async function updateStatus(id, status) {
+    try {
+        await fetch(`tables/${TABLE}/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status }),
+        });
+        const idx = allData.findIndex(r => r.id === id);
+        if (idx !== -1) allData[idx].status = status;
+        showToast(`상태가 '${status}'로 변경되었습니다`, 'success');
+    } catch {
+        showToast('상태 변경 실패', 'error');
+    }
+}
+
+// ─────────────────────────────────────────────
+// DELETE
+// ─────────────────────────────────────────────
+async function deleteRecord(id) {
+    if (!confirm('이 신청 데이터를 삭제하시겠습니까?')) return;
+    try {
+        await fetch(`tables/${TABLE}/${id}`, { method: 'DELETE' });
+        allData = allData.filter(r => r.id !== id);
+        filtered = filtered.filter(r => r.id !== id);
+        showToast('삭제되었습니다', 'success');
+        renderCurrentActive();
+    } catch {
+        showToast('삭제 실패', 'error');
+    }
+}
+
+// ─────────────────────────────────────────────
+// FILTER REGION OPTIONS
+// ─────────────────────────────────────────────
+function populateRegionFilter() {
+    const sel = document.getElementById('filterRegion');
+    if (!sel) return;
+    const regions = [...new Set(allData.map(r => r.region).filter(Boolean))].sort();
+    sel.innerHTML = '<option value="">전체</option>' +
+        regions.map(r => `<option value="${r}">${r}</option>`).join('');
+}
+
+// ─────────────────────────────────────────────
+// CSV EXPORT
+// ─────────────────────────────────────────────
+function exportCSV() {
+    const headers = ['이름','전화번호','지역','경력/신입','상태','신청일시'];
+    const rows = filtered.map(r => [
+        r.name, r.phone, r.region, r.career, r.status, fmtDate(r.created_at)
+    ].map(v => `"${(v||'').replace(/"/g,'""')}"`));
+
+    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `HK금융파트너스_신청목록_${new Date().toLocaleDateString('ko-KR').replace(/\./g,'').trim()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('CSV 다운로드 완료', 'success');
+}
+
+// ─────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────
+function esc(str) {
+    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmtDate(ts) {
+    if (!ts) return '-';
+    const d = new Date(typeof ts === 'number' ? ts : Date.parse(ts));
+    if (isNaN(d)) return '-';
+    return d.toLocaleString('ko-KR', { year:'numeric', month:'2-digit', day:'2-digit',
+                                       hour:'2-digit', minute:'2-digit' });
+}
+
+function statusBadgeHtml(s) {
+    const cls = {
+        '접수':'badge-접수','검토중':'badge-검토중','연락완료':'badge-연락완료',
+        '면담완료':'badge-면담완료','불합격':'badge-불합격'
+    }[s] || 'badge-접수';
+    return `<span class="badge ${cls}">${esc(s||'접수')}</span>`;
+}
+
+function careerBadge(c) {
+    return (c === '신입') ? 'badge-신입' : 'badge-경력';
+}
+
+function groupCount(data, field) {
+    const obj = {};
+    data.forEach(r => { const k = r[field]||'미입력'; obj[k] = (obj[k]||0)+1; });
+    return obj;
+}
+
+function buildTrend(data, days) {
+    const labels = [], values = [], today = new Date();
+    for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const key = d.toLocaleDateString('ko-KR', { month:'2-digit', day:'2-digit' });
+        labels.push(key);
+        const count = data.filter(r => {
+            if (!r.created_at) return false;
+            const rd = new Date(typeof r.created_at === 'number' ? r.created_at : Date.parse(r.created_at));
+            return rd.toDateString() === d.toDateString();
+        }).length;
+        values.push(count);
+    }
+    return { labels, values };
+}
+
+// ─────────────────────────────────────────────
+// TOAST
+// ─────────────────────────────────────────────
+function showToast(msg, type = '') {
+    const wrap = document.getElementById('toastWrap');
+    const t = document.createElement('div');
+    t.className = `toast toast-${type}`;
+    t.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':type==='error'?'circle-exclamation':'info-circle'}"></i> ${msg}`;
+    wrap.appendChild(t);
+    requestAnimationFrame(() => t.classList.add('show'));
+    setTimeout(() => {
+        t.classList.remove('show');
+        setTimeout(() => t.remove(), 400);
+    }, 2500);
+}
+
+// Modal 외부 클릭 닫기
+document.getElementById('detailModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
